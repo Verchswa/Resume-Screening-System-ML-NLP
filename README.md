@@ -47,17 +47,29 @@ Similarity Measure: Cosine Similarity
 📂 Project Structure
 
 Resume-Screening-System/
+
 │── data/
+
 │   └── Resume.csv
+
 │
+
 │── model/
+
 │   ├── resume_classifier.pkl
+
 │   └── tfidf.pkl
+
 │
+
 │── preprocess.py
+
 │── train_model.py
+
 │── app.py
+
 │── README.md
+
 │── LICENSE
 
 
