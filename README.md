@@ -30,7 +30,9 @@ This system improves resume screening by:
 ⚡ Fast and lightweight model
 🧠 Explainable results (no black-box AI)
 
+
 🛠️ Tech Stack
+
 Language: Python 🐍
 Libraries:
 Pandas
@@ -41,7 +43,9 @@ Model: Linear SVM
 Feature Extraction: TF-IDF
 Similarity Measure: Cosine Similarity
 
+
 📂 Project Structure
+
 Resume-Screening-System/
 │── data/
 │   └── Resume.csv
@@ -56,31 +60,42 @@ Resume-Screening-System/
 │── README.md
 │── LICENSE
 
+
 🔄 Workflow
+
 📥 Input Resume & Job Description
 🧹 Text Preprocessing (NLP)
 🔢 Feature Extraction (TF-IDF)
 🤖 Classification (Linear SVM)
 📊 Similarity Calculation (Cosine Similarity)
 
+
 📊 Sample Output
+
 Predicted Job Domain: Data Science
 Resume–JD Match Score: 46.44%
 
+
 📈 Model Insights
+
 ✔ Linear SVM performs well for text classification
 ✔ TF-IDF captures important domain-specific skills
 ✔ Cosine similarity provides semantic matching
 
+
 🔮 Future Scope
+
 🚀 Integration with Deep Learning (BERT)
 💡 Skill recommendation system
 🌐 Web-based deployment
 ⚖️ Bias detection and fairness analysis
 
+
 📚 Dataset
+
 📌 Kaggle Resume Dataset
 Contains labeled resumes across multiple job categories
+
 
 👨‍💻 Author
 
@@ -88,12 +103,14 @@ Verchswa Verma
 🎓 B.Tech CSE
 🏫 Rajkiya Engineering College, Kannauj
 
+
 ⭐ Support
 
 If you found this project useful:
 
 👉 Give it a ⭐ on GitHub
 👉 Share with others
+
 
 📜 License
 
