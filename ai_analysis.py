@@ -1,6 +1,7 @@
 import google.generativeai as genai
+import streamlit as st
 
-genai.configure(api_key="GEMINI_API_KEY")
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 
 model = genai.GenerativeModel("models/gemini-2.5-flash")
 def analyze_resume(resume_text, jd_text):
