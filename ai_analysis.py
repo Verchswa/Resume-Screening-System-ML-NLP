@@ -1,52 +1,49 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Securely pull API key from Streamlit Secrets
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel("models/gemini-2.5-flash")
 
-def analyze_resume(resume_text, jd_text):
+def get_combined_insights(resume_text, jd_text):
+    """Fetches analysis, questions, and scores in ONE single API call."""
     prompt = f"""
-    Analyze this resume vs JD. Be extremely concise. Use Markdown.
-    Resume: {resume_text}
-    JD: {jd_text}
-    Output Format:
-    ### 📊 Quick Match
-    * **Role Fit:** [Score/10] - [1-sentence justification]
-    * **Top 3 Strengths:** [Skill 1, 2, 3]
-    * **Top 3 Gaps:** [Gap 1, 2, 3]
-    ### 🛠️ Key Advice
-    * [1-sentence specific improvement tip]
-    """
-    response = model.generate_content(prompt)
-    return response.text
-
-def generate_interview_questions(resume_text, jd_text):
-    prompt = f"""
-    Identify the 3 biggest skill gaps between this resume and the JD.
-    Generate 1 challenging technical interview question for each gap.
-    Resume: {resume_text}
-    JD: {jd_text}
-    """
-    response = model.generate_content(prompt)
-    return response.text
-
-def get_radar_data(resume_text, jd_text):
-    """Asks AI for numerical scores to build the Radar Chart."""
-    prompt = f"""
-    Rate the candidate from 1 to 10 on these 5 categories based on the JD:
-    Technical, Experience, Projects, Education, Soft_Skills.
-    Output ONLY in this format:
-    Technical: [score], Experience: [score], Projects: [score], Education: [score], Soft_Skills: [score]
+    Analyze this resume against the following Job Description (JD).
     
     Resume: {resume_text}
     JD: {jd_text}
+    
+    You MUST provide the output in three distinct sections using these exact markers:
+    
+    [ANALYSIS_START]
+    (Provide a concise Markdown analysis of Strengths, Gaps, and a Role Fit score out of 10)
+    [ANALYSIS_END]
+    
+    [QUESTIONS_START]
+    (Provide 3 challenging interview questions based on the candidate's gaps)
+    [QUESTIONS_END]
+    
+    [SCORES_START]
+    Technical: [score], Experience: [score], Projects: [score], Education: [score], Soft_Skills: [score]
+    [SCORES_END]
+    
+    Be concise and professional.
     """
+    
     try:
         response = model.generate_content(prompt).text
-        # Parses "Technical: 8, Experience: 5..." into a dictionary
-        scores = {item.split(": ")[0].strip(): int(item.split(": ")[1].strip()) for item in response.split(", ")}
-        return scores
+        return response
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+def parse_insights(raw_text):
+    """Splits the single AI response into parts for the UI."""
+    try:
+        analysis = raw_text.split("[ANALYSIS_START]")[1].split("[ANALYSIS_END]")[0].strip()
+        questions = raw_text.split("[QUESTIONS_START]")[1].split("[QUESTIONS_END]")[0].strip()
+        scores_raw = raw_text.split("[SCORES_START]")[1].split("[SCORES_END]")[0].strip()
+        
+        # Turn "Technical: 8, Experience: 7..." into a dictionary
+        scores = {item.split(": ")[0].strip(): int(item.split(": ")[1].strip()) for item in scores_raw.split(", ")}
+        return analysis, questions, scores
     except:
-        # Fallback if AI output is messy
-        return {"Technical": 5, "Experience": 5, "Projects": 5, "Education": 5, "Soft_Skills": 5}
+        return "Analysis failed to parse.", "Questions failed to parse.", {"Technical": 5, "Experience": 5, "Projects": 5, "Education": 5, "Soft_Skills": 5}
