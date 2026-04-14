@@ -1,6 +1,6 @@
 import google.generativeai as genai
 
-genai.configure(api_key="AIzaSyAowtU4mgC3qmyxoXO8YleEsZLqruozi-g")
+genai.configure(api_key="GEMINI_API_KEY")
 
 model = genai.GenerativeModel("models/gemini-2.5-flash")
 def analyze_resume(resume_text, jd_text):
