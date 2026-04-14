@@ -5,6 +5,3 @@ PyPDF2
 nltk
 pandas
 plotly
-xlsxwriter
-pandas
-openpyxl
