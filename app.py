@@ -1,6 +1,7 @@
 import pickle
 from preprocess import clean_text
 from sklearn.metrics.pairwise import cosine_similarity
+from ai_analysis import analyze_resume
 
 # Load trained model
 model = pickle.load(open("model/resume_classifier.pkl", "rb"))
@@ -42,3 +43,8 @@ score = cosine_similarity(vectors[0], vectors[1])[0][0] * 100
 print("\n----- RESULT -----")
 print("Predicted Job Domain:", prediction)
 print("Resume–JD Match Score:", round(score, 2), "%")
+
+analysis = analyze_resume(clean_resume, clean_jd)
+
+print("\nAI Analysis:\n")
+print(analysis)
