@@ -2,16 +2,17 @@ import streamlit as st
 import pickle
 import pandas as pd
 import plotly.express as px
-import io
 import os
 import time
 from preprocess import clean_text, extract_text_from_pdf
 from ai_analysis import get_combined_insights, parse_insights
 from sklearn.metrics.pairwise import cosine_similarity
 
+# --- Page Config ---
 st.set_page_config(page_title="AI Recruitment Suite", page_icon="🏢", layout="wide")
 st.title("🎯 AI Resume Screening & Interview Dashboard")
 
+# --- Load ML Assets ---
 @st.cache_resource
 def load_models():
     classifier = pickle.load(open("model/resume_classifier.pkl", "rb"))
@@ -25,9 +26,12 @@ with st.sidebar:
     st.header("📋 Job Requirements")
     jd_input = st.text_area("Paste Job Description:", height=300)
     st.divider()
-    if st.checkbox("Show History"):
+    if st.checkbox("Show History Log"):
         if os.path.exists("history.csv"):
+            st.markdown("### Past Screenings")
             st.dataframe(pd.read_csv("history.csv"))
+        else:
+            st.info("No history found yet.")
 
 # --- Main App ---
 uploaded_files = st.file_uploader("Upload Resumes (PDF)", type="pdf", accept_multiple_files=True)
@@ -37,24 +41,28 @@ if st.button("🚀 Analyze Candidates") and uploaded_files and jd_input:
     
     for uploaded_file in uploaded_files:
         with st.status(f"Processing {uploaded_file.name}...", expanded=False):
+            # 1. Text Extraction
             resume_text = extract_text_from_pdf(uploaded_file)
             
-            # 1. ML Scoring
+            # 2. ML Scoring (Local)
             clean_res = clean_text(resume_text)
             clean_jd = clean_text(jd_input)
             vecs = tfidf.transform([clean_res, clean_jd])
             score = cosine_similarity(vecs[0], vecs[1])[0][0] * 100
             category = classifier.predict(tfidf.transform([clean_res]))[0]
             
-            # 2. Combined AI Insights (The 3-in-1 Call)
+            # 3. AI Insights (Single API Call)
             raw_output = get_combined_insights(resume_text, jd_input)
             analysis, questions, scores = parse_insights(raw_output)
             
-            # 3. Save Data
-            res_data = {"Candidate": uploaded_file.name, "Score": round(score, 1), "Category": category}
-            all_results.append(res_data)
+            # 4. Collect Data for History
+            all_results.append({
+                "Candidate": uploaded_file.name, 
+                "Score": round(score, 1), 
+                "Category": category
+            })
 
-            # 4. UI Display
+            # 5. UI Display
             st.subheader(f"Results for {uploaded_file.name}")
             c1, c2 = st.columns([1, 2])
             
@@ -70,17 +78,13 @@ if st.button("🚀 Analyze Candidates") and uploaded_files and jd_input:
                 with t2: st.markdown(questions)
             
             st.divider()
-            time.sleep(1) # Small pause to respect Rate Limits
+            time.sleep(1) # Safety pause for API Rate Limits
 
-    # --- Export ---
-    df_final = pd.DataFrame(all_results)
-    df_final.to_csv("history.csv", mode='a', header=not os.path.exists("history.csv"), index=False)
-    
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        df_final.to_excel(writer, index=False, sheet_name='Report')
-    
-    st.download_button(label="📥 Download Excel Report", data=buffer.getvalue(), file_name="report.xlsx", mime="application/vnd.ms-excel")
+    # --- Save History to CSV ---
+    if all_results:
+        df_history = pd.DataFrame(all_results)
+        df_history.to_csv("history.csv", mode='a', header=not os.path.exists("history.csv"), index=False)
+        st.success("Analysis complete! Results saved to history log.")
 
 elif not uploaded_files:
     st.info("Upload PDF resumes and enter a JD to start.")
