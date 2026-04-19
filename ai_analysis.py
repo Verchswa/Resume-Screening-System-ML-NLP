@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 # Setup
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel("models/gemini-2.5-flash")
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 def get_combined_insights(resume_text, jd_text):
     try:
