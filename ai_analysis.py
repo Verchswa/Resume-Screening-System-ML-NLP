@@ -6,6 +6,14 @@ genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel("models/gemini-2.5-flash")
 
 def get_combined_insights(resume_text, jd_text):
+    try:
+        # The core AI call
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        # This will show a friendly message instead of crashing the whole app
+        return f"ERROR_API: {str(e)}"
+def get_combined_insights(resume_text, jd_text):
     """Fetches deep analysis and specific chart coordinates in one call."""
     prompt = f"""
     Act as an expert Technical Recruiter. Compare this Resume to the Job Description (JD).
